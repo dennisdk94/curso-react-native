@@ -1,4 +1,4 @@
-const moment = require('moment');
+const moment = require('moment')
 
 module.exports = app => {
   const getTasks = (req, res) => {
@@ -6,7 +6,7 @@ module.exports = app => {
       : moment().endOf('day').toDate()
 
     app.db('tasks')
-      .where({ userId: req.userId })
+      .where({ userId: req.user.id })
       .where('estimateAt', '<=', date)
       .orderBy('estimateAt')
       .then(tasks => res.json(tasks))
@@ -18,7 +18,7 @@ module.exports = app => {
       return res.status(400).send('Descrição é um campo obrigatório')
     }
 
-    req.body.userId = req.userId
+    req.body.userId = req.user.id
 
     app.db('tasks')
       .insert(req.body)
@@ -41,7 +41,7 @@ module.exports = app => {
       .catch(err => res.status(400).json(err))
   }
 
-  const updateTaskDoneAt = (req, res) => {
+  const updateTaskDoneAt = (req, res, doneAt) => {
     app.db('tasks')
       .where({ id: req.params.id, userId: req.user.id })
       .update({ doneAt })
@@ -55,7 +55,7 @@ module.exports = app => {
       .first()
       .then(task => {
         if (!task) {
-          const msg = `Task com id ${req.params.id} não encontada`
+          const msg = `Task com id ${req.params.id} não encontrada.`
           return res.status(400).send(msg)
         }
 
